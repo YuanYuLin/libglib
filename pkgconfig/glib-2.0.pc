@@ -1,0 +1,16 @@
+prefix=${SDKSTAGE}
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/usr/include/libglib
+
+glib_genmarshal=glib-genmarshal
+gobject_query=gobject-query
+glib_mkenums=glib-mkenums
+
+Name: GLib
+Description: C Utility Library
+Version: 2.54.3
+Requires.private: libpcre
+Libs: -L${libdir} -lglib-2.0 
+Libs.private: -pthread  "-L${libdir} -lpcre"    
+Cflags: -I${includedir}/glib-2.0 -I${includedir}/gio-unix-2.0 -I${includedir}
