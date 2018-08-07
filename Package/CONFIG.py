@@ -48,7 +48,7 @@ def MAIN_ENV(args):
     ops.exportEnv(ops.setEnv("CXX", ops.getEnv("CROSS_COMPILE") + "g++"))
     ops.exportEnv(ops.setEnv("CROSS", ops.getEnv("CROSS_COMPILE")))
     ops.exportEnv(ops.setEnv("DESTDIR", install_tmp_dir))
-    ops.exportEnv(ops.addEnv("PATH", ops.path_join(install_tmp_dir, "usr/local/bin")))
+    #ops.exportEnv(ops.addEnv("PATH", ops.path_join(install_tmp_dir, "usr/local/bin")))
 
     cc_sysroot = ops.getEnv("CC_SYSROOT")
 
@@ -61,8 +61,8 @@ def MAIN_ENV(args):
     ldflags += " -L" + ops.path_join(iopc.getSdkPath(), 'lib')
     ldflags += " -L" + ops.path_join(iopc.getSdkPath(), 'usr/lib')
 
-    ops.exportEnv(ops.setEnv("LDFLAGS", ldflags))
-    ops.exportEnv(ops.setEnv("CFLAGS", cflags))
+    #ops.exportEnv(ops.setEnv("LDFLAGS", ldflags))
+    #ops.exportEnv(ops.setEnv("CFLAGS", cflags))
     #ops.exportEnv(ops.setEnv("LIBS", libs))
     #extra_conf.append('CFLAGS="-I' + ops.path_join(iopc.getSdkPath(), 'usr/include/libz') + '"')
 
@@ -89,19 +89,34 @@ def MAIN_PATCH(args, patch_group_name):
 def MAIN_CONFIGURE(args):
     set_global(args)
 
-    print "SDK include path:" + iopc.getSdkPath()
-
     extra_conf = []
     extra_conf.append("--host=" + cc_host)
     extra_conf.append("--disable-libmount")
-    extra_conf.append('ZLIB_CFLAGS="-I' + ops.path_join(iopc.getSdkPath(), 'usr/include/libz') + '"')
-    extra_conf.append('ZLIB_LIBS="-L' + ops.path_join(iopc.getSdkPath(), 'lib') + ' -lz"')
-    extra_conf.append('LIBFFI_CFLAGS="-I' + ops.path_join(iopc.getSdkPath(), 'usr/include') + '"')
-    extra_conf.append('LIBFFI_LIBS="-L' + ops.path_join(iopc.getSdkPath(), 'usr/lib') + ' -lffi"')
-    extra_conf.append('PCRE_CFLAGS="-I' + ops.path_join(iopc.getSdkPath(), 'usr/include/libpcre3') + '"')
-    extra_conf.append('PCRE_LIBS="-L' + ops.path_join(iopc.getSdkPath(), 'lib') + ' -lpcre"')
+    extra_conf.append("--disable-fam")
+    extra_conf.append("--with-pcre=system")
+
+    cc_sysroot = ops.getEnv("CC_SYSROOT")
+    cflags = ""
+    cflags += " -I" + ops.path_join(cc_sysroot, 'usr/include')
+    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libz')
+    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libffi')
+    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libpcre3')
+
+    libs = ""
+    libs += " -L" + ops.path_join(cc_sysroot, 'lib')
+    libs += " -L" + ops.path_join(cc_sysroot, 'usr/lib')
+    libs += " -L" + ops.path_join(iopc.getSdkPath(), 'lib')
+    libs += " -lz -lffi -lpcre"
+                                    
+    extra_conf.append('ZLIB_CFLAGS=' + cflags)
+    extra_conf.append('ZLIB_LIBS=' + libs)
+    extra_conf.append('LIBFFI_CFLAGS=' + cflags)
+    extra_conf.append('LIBFFI_LIBS=' + libs)
+    extra_conf.append('PCRE_CFLAGS=' + cflags)
+    extra_conf.append('PCRE_LIBS=' + libs)
     extra_conf.append("glib_cv_stack_grows=no")
     extra_conf.append("glib_cv_uscore=no")
+    extra_conf.append("glib_cv_pcre_has_unicode=yes")
 
     print extra_conf
     iopc.configure(tarball_dir, extra_conf)
@@ -115,12 +130,6 @@ def MAIN_BUILD(args):
     ops.mkdir(install_tmp_dir)
     iopc.make(tarball_dir)
     iopc.make_install(tarball_dir)
-    return False
-
-def MAIN_INSTALL(args):
-    set_global(args)
-
-    ops.mkdir(install_dir)
 
     ops.mkdir(dst_lib_dir)
 
@@ -155,6 +164,11 @@ def MAIN_INSTALL(args):
 
     ops.mkdir(dst_pkgconfig_dir)
     ops.copyto(ops.path_join(src_pkgconfig_dir, '.'), dst_pkgconfig_dir)
+
+    return False
+
+def MAIN_INSTALL(args):
+    set_global(args)
 
     iopc.installBin(args["pkg_name"], ops.path_join(dst_lib_dir, "."), "lib")
     iopc.installBin(args["pkg_name"], dst_include_dir, "include")

@@ -1,4 +1,4 @@
-prefix=${SDKSTAGE}
+prefix={{SDKSTAGE}}
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/usr/include/libglib
