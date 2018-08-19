@@ -165,7 +165,7 @@ def MAIN_BUILD(args):
     ops.mkdir(dst_pkgconfig_dir)
     ops.copyto(ops.path_join(src_pkgconfig_dir, '.'), dst_pkgconfig_dir)
 
-    return False
+    return True
 
 def MAIN_INSTALL(args):
     set_global(args)
