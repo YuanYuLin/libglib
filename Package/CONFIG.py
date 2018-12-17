@@ -89,25 +89,15 @@ def MAIN_PATCH(args, patch_group_name):
 def MAIN_CONFIGURE(args):
     set_global(args)
 
+    cflags = iopc.get_includes()
+    libs = iopc.get_libs()
+
     extra_conf = []
     extra_conf.append("--host=" + cc_host)
     extra_conf.append("--disable-libmount")
     extra_conf.append("--disable-fam")
     extra_conf.append("--with-pcre=system")
 
-    cc_sysroot = ops.getEnv("CC_SYSROOT")
-    cflags = ""
-    cflags += " -I" + ops.path_join(cc_sysroot, 'usr/include')
-    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libz')
-    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libffi')
-    cflags += " -I" + ops.path_join(iopc.getSdkPath(), 'usr/include/libpcre3')
-
-    libs = ""
-    libs += " -L" + ops.path_join(cc_sysroot, 'lib')
-    libs += " -L" + ops.path_join(cc_sysroot, 'usr/lib')
-    libs += " -L" + ops.path_join(iopc.getSdkPath(), 'lib')
-    libs += " -lz -lffi -lpcre"
-                                    
     extra_conf.append('ZLIB_CFLAGS=' + cflags)
     extra_conf.append('ZLIB_LIBS=' + libs)
     extra_conf.append('LIBFFI_CFLAGS=' + cflags)
@@ -173,6 +163,21 @@ def MAIN_INSTALL(args):
     iopc.installBin(args["pkg_name"], ops.path_join(dst_lib_dir, "."), "lib")
     iopc.installBin(args["pkg_name"], dst_include_dir, "include")
     iopc.installBin(args["pkg_name"], ops.path_join(dst_pkgconfig_dir, '.'), "pkgconfig")
+
+    return False
+
+def MAIN_SDKENV(args):
+    set_global(args)
+
+    include = ops.path_join(iopc.getSdkPath(), 'usr/include/' + args["pkg_name"])
+    cflags = ""
+    cflags += " -I" + include
+    cflags += " -I" + ops.path_join(include, "glib-2.0")
+    cflags += " -I" + ops.path_join(include, "gio-unix-2.0")
+    iopc.add_includes(cflags)
+
+    libs = " -lgio-2.0 -lglib-2.0 -lgmodule-2.0 -lgobject-2.0 -lgthread-2.0"
+    iopc.add_libs(libs)
 
     return False
 
