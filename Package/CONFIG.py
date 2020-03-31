@@ -59,7 +59,7 @@ def MAIN_ENV(args):
     ldflags += " -L" + ops.path_join(cc_sysroot, 'lib')
     ldflags += " -L" + ops.path_join(cc_sysroot, 'usr/lib')
     ldflags += " -L" + ops.path_join(iopc.getSdkPath(), 'lib')
-    ldflags += " -L" + ops.path_join(iopc.getSdkPath(), 'usr/lib')
+    #ldflags += " -L" + ops.path_join(iopc.getSdkPath(), 'usr/lib')
 
     #ops.exportEnv(ops.setEnv("LDFLAGS", ldflags))
     #ops.exportEnv(ops.setEnv("CFLAGS", cflags))
